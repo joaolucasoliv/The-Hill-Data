@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# I used Opportunity Atlas data for this tool 
+
 # Hill summary (already computed in your script) 
 hill_summary = {
     "Median Income (Age 35)": 24614.5,
