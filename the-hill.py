@@ -1,32 +1,42 @@
-import pandas as pd
+import polars as pl
 import matplotlib.pyplot as plt
 
 # I used Opportunity Atlas data for this tool 
 
 # Hill summary (already computed in your script) 
-hill_summary = {
-    "Median Income (Age 35)": 24614.5,
-    "Poverty Rate": 43.5,
-    "Incarceration Rate": 5.6,
-    "Single-Parent Households": 65.1,
-    "Racial Composition (% Non-White)": 90.3
-}
+hill_summary = pl.DataFrame({
+    "Variable": [
+        "Median Income (Age 35)", 
+        "Poverty Rate", 
+        "Incarceration Rate", 
+        "Single-Parent Households", 
+        "Racial Composition (% Non-White)"
+    ],
+    "Value": [24614.5, 43.5, 5.6, 65.1, 90.3]  # Ensure all values are floats
+})
 
 # U.S. averages 
-us_avg = {
-    "Median Income (Age 35)": 46645,
-    "Poverty Rate": 13,
-    "Incarceration Rate": 1.2,
-    "Single-Parent Households": 30,
-    "Racial Composition (% Non-White)": 40
-}
+us_avg = pl.DataFrame({
+    "Variable": [
+        "Median Income (Age 35)", 
+        "Poverty Rate", 
+        "Incarceration Rate", 
+        "Single-Parent Households", 
+        "Racial Composition (% Non-White)"
+    ],
+    "Value": [46645.0, 13.0, 1.2, 30.0, 40.0]  # Explicitly cast all values to floats
+})
 
-# --- Normalize Hill values relative to U.S. = 100 ---
-variables = list(hill_summary.keys())
-hill_vals = [hill_summary[v] / us_avg[v] * 100 for v in variables]
+# Normalize Hill values relative to U.S. = 100 
+normalized = hill_summary.join(us_avg, on="Variable", how="inner").with_columns(
+    (pl.col("Value") / pl.col("Value_right") * 100).alias("Normalized Value")
+)
+
+variables = normalized["Variable"].to_list()
+hill_vals = normalized["Normalized Value"].to_list()
 us_vals = [100 for _ in variables]  # baseline
 
-# --- Plot ---
+# Plot 
 x = range(len(variables))
 bar_width = 0.35
 
